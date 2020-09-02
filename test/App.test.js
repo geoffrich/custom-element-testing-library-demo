@@ -27,7 +27,7 @@ describe('Svelte tests', () => {
 
     // the greeting is in a custom element
     test('simple greeting', async () => {
-        renderWithCustomElements(App, { name: 'Geoff' });
+        render(App, { name: 'Geoff' });
         await tick();
         const greeting = screen.getByText('Hello, Geoff!');
         // why can't I use toBeIntheDocument here?

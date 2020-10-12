@@ -1,10 +1,11 @@
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import {
     querySelectorAllDeep,
     querySelectorDeep
 } from 'query-selector-shadow-dom';
-import { tick } from 'svelte';
+// TODO: better way of importing custom elements
 import '../src/custom-elements/simple-greeting';
+import '../src/custom-elements/custom-button';
 
 import App from '../src/App'
 
@@ -20,17 +21,31 @@ function renderWithCustomElements(ui, options) {
 
 describe('Svelte tests', () => {
     test('main heading', () => {
-        render(App, { name: 'world' });
+        renderWithCustomElements(App, { name: 'world' });
         const mainHeading = screen.getByText('Custom Element Demo');
         expect(mainHeading).toBeInTheDocument();
     });
 
-    // the greeting is in a custom element
     test('simple greeting', async () => {
-        render(App, { name: 'Geoff' });
-        await tick();
-        const greeting = screen.getByText('Hello, Geoff!');
-        // why can't I use toBeIntheDocument here?
+        renderWithCustomElements(App, { name: 'Geoff' });
+        // wait for custom element to be rendered
+        const greeting = await screen.findByText('Hello, Geoff!');
+        // you can't use toBeInTheDocument for custom element children
+        // because element.ownerDocument.contains(element) returns false
         expect(greeting).toBeVisible();
+
+        // possibly contribute back to testing library?
+        const root = greeting.getRootNode().host;
+        expect(root).toBeInTheDocument();
+    });
+
+    test('custom button', async () => {
+        renderWithCustomElements(App, { name: 'Geoff' });
+        const button = await screen.findByRole('button', {name: "Submit"});
+        button.click();
+        await waitFor(() => {
+            expect(screen.getByText('Successfully submitted!')).toBeInTheDocument();
+        });
+        expect(button).toBeDisabled();
     });
 })

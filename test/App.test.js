@@ -27,13 +27,7 @@ describe('Svelte tests', () => {
         render(App, { name: 'Geoff' });
         // wait for custom element to be rendered
         const greeting = await screen.findByText('Hello, Geoff!');
-        // you can't use toBeInTheDocument for custom element children
-        // because element.ownerDocument.contains(element) returns false
-        expect(greeting).toBeVisible();
-
-        // PR open on testing-library to make workaround unnecessary
-        const root = greeting.getRootNode().host;
-        expect(root).toBeInTheDocument();
+        expect(greeting).toBeInTheDocument();
     });
 
     test('custom button', async () => {
